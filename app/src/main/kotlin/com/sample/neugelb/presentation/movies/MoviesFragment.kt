@@ -39,6 +39,9 @@ class MoviesFragment : Fragment() {
     private lateinit var searchView: SearchView
     private lateinit var moviesAdapter: MoviesAdapter
 
+    private var rootView: View? = null
+    private var currentQueryValue: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
@@ -48,8 +51,14 @@ class MoviesFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View =
-        inflater.inflate(R.layout.fragment_movies, container, false)
+    ): View? {
+        if (null == rootView) {
+            rootView = inflater.inflate(R.layout.fragment_movies, container, false)
+            moviesAdapter = MoviesAdapter(itemClick)
+            setupObservers()
+        }
+        return rootView
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -57,7 +66,6 @@ class MoviesFragment : Fragment() {
         retryButton.setOnClickListener { moviesAdapter.retry() }
 
         setupRecyclerView()
-        setupObservers()
     }
 
     override fun onResume() {
@@ -72,7 +80,6 @@ class MoviesFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        moviesAdapter = MoviesAdapter(itemClick)
         val spanCount = 3
 
         recyclerViewMovies.apply {
@@ -131,6 +138,7 @@ class MoviesFragment : Fragment() {
             isSubmitButtonEnabled = true
             onActionViewExpanded()
         }
+        searchView.setQuery(currentQueryValue, false)
         search(searchView)
         super.onCreateOptionsMenu(menu, inflater)
     }
@@ -140,6 +148,7 @@ class MoviesFragment : Fragment() {
             this.lifecycle
         ) { newText ->
             newText?.let { searchQuery ->
+                currentQueryValue = searchQuery
                 if (searchQuery.isEmpty()) {
                     nowPlayingJob?.cancel()
                     nowPlayingJob = lifecycleScope.launch {

@@ -8,6 +8,7 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -55,7 +56,7 @@ class MovieDetailFragment : Fragment() {
     }
 
     private fun initUI() {
-        viewModel.selected.observe(viewLifecycleOwner, { movie ->
+        viewModel.selected.observe(viewLifecycleOwner) { movie ->
             (activity as AppCompatActivity).supportActionBar?.title = movie.title
             textTitle.text = movie.title
             textReleaseDate.text = movie.release_date
@@ -71,6 +72,6 @@ class MovieDetailFragment : Fragment() {
                     .centerInside()
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(imageMovie)
-        })
+        }
     }
 }
