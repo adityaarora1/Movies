@@ -1,6 +1,7 @@
 package com.sample.neugelb.presentation.movies
 
 import androidx.hilt.lifecycle.ViewModelInject
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,32 +24,32 @@ internal class MoviesViewModel @ViewModelInject constructor(
 
     private val pageSize = 20
 
-    private var currentQueryValue: String? = null
-    private lateinit var searchResult: Flow<PagingData<Movie>>
-    private var currentSearchResult: Flow<PagingData<Movie>>? = null
+    var currentQueryValue: String? = null
 
     val selected = MutableLiveData<Movie>()
+
+    private var moviesLiveData = MutableLiveData<Flow<PagingData<Movie>>>()
+    fun getMoviesLiveData(): LiveData<Flow<PagingData<Movie>>> = moviesLiveData
 
     fun select(item: Movie) {
         selected.value = item
     }
 
-    fun searchMovie(query: String): Flow<PagingData<Movie>> {
-        val lastResult = currentSearchResult
-        if (query == currentQueryValue && lastResult != null) return lastResult
-        currentQueryValue = query
-        searchResult = Pager(PagingConfig(pageSize = pageSize)) {
+    init {
+        nowPlaying()
+    }
+
+    fun nowPlaying() {
+        moviesLiveData.value = Pager(PagingConfig(pageSize = pageSize)) {
+            MoviesDataSource(useCase = getNowPlayingUseCase)
+        }.flow.cachedIn(viewModelScope)
+    }
+
+    fun searchMovie(query: String) {
+        moviesLiveData.value = Pager(PagingConfig(pageSize = pageSize)) {
             SearchMovieDataSource(useCase = searchMovieUseCase).apply {
                 this.setQuery(query)
             }
-        }.flow.cachedIn(viewModelScope)
-        currentSearchResult = searchResult
-        return searchResult
-    }
-
-    fun nowPlaying(): Flow<PagingData<Movie>> {
-        return Pager(PagingConfig(pageSize = pageSize)) {
-            MoviesDataSource(useCase = getNowPlayingUseCase)
         }.flow.cachedIn(viewModelScope)
     }
 }

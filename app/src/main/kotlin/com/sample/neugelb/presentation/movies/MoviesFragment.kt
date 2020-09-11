@@ -40,7 +40,6 @@ class MoviesFragment : Fragment() {
     private lateinit var moviesAdapter: MoviesAdapter
 
     private var rootView: View? = null
-    private var currentQueryValue: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,9 +54,13 @@ class MoviesFragment : Fragment() {
         if (null == rootView) {
             rootView = inflater.inflate(R.layout.fragment_movies, container, false)
             moviesAdapter = MoviesAdapter(itemClick)
-            setupObservers()
         }
         return rootView
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        setupObservers()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -123,9 +126,11 @@ class MoviesFragment : Fragment() {
     }
 
     private fun setupObservers() {
-        lifecycleScope.launch {
-            moviesViewModel.nowPlaying().collectLatest {
-                moviesAdapter.submitData(it)
+        moviesViewModel.getMoviesLiveData().observe(viewLifecycleOwner) { flow ->
+            lifecycleScope.launch {
+                flow.collectLatest {
+                    moviesAdapter.submitData(it)
+                }
             }
         }
     }
@@ -138,7 +143,7 @@ class MoviesFragment : Fragment() {
             isSubmitButtonEnabled = true
             onActionViewExpanded()
         }
-        searchView.setQuery(currentQueryValue, false)
+        searchView.setQuery(moviesViewModel.currentQueryValue, false)
         search(searchView)
         super.onCreateOptionsMenu(menu, inflater)
     }
@@ -148,26 +153,20 @@ class MoviesFragment : Fragment() {
             this.lifecycle
         ) { newText ->
             newText?.let { searchQuery ->
-                currentQueryValue = searchQuery
                 if (searchQuery.isEmpty()) {
                     nowPlayingJob?.cancel()
                     nowPlayingJob = lifecycleScope.launch {
-                        moviesViewModel.nowPlaying().collectLatest {
-                            moviesAdapter.submitData(it)
-                        }
-
+                        moviesViewModel.nowPlaying()
                     }
                 } else {
                     searchJob?.cancel()
                     searchJob = lifecycleScope.launch {
-                        moviesViewModel.searchMovie(searchQuery).collectLatest {
-                            moviesAdapter.submitData(it)
-                        }
+                        moviesViewModel.searchMovie(searchQuery)
                     }
                 }
+                moviesViewModel.currentQueryValue = searchQuery
             }
-        }
-        )
+        })
     }
 
     internal class DebouncingQueryTextListener(
