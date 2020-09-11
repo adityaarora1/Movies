@@ -15,7 +15,7 @@ Take a look at config.gradle and fill it with your own API key like this:
 ```apiKey = YOUR_OWN_TMDB_API_KEY```
 
 ## Built With
-* [Coroutines](https://developer.android.com/kotlin/coroutines) for Concurrency
+* [Coroutines](https://developer.android.com/kotlin/coroutines) for concurrency
 * [Hilt](https://dagger.dev/hilt/) for dependency injection
 * [Paging 3](https://developer.android.com/topic/libraries/architecture/paging/v3-overview) for infinte scroll
 * [Navigation Component](https://developer.android.com/guide/navigation) for navigating within the App
@@ -23,8 +23,8 @@ Take a look at config.gradle and fill it with your own API key like this:
 * [OkHttp](https://github.com/square/okhttp) for http & logging
 * [Glide](https://github.com/bumptech/glide) for image loading
 * [Moshi](https://github.com/square/moshi) for parsing JSON into Java objects
-* [Lottie](https://airbnb.design/lottie/) for Animations
-* [Timber](https://github.com/JakeWharton/timber) for Logging
+* [Lottie](https://airbnb.design/lottie/) for animations
+* [Timber](https://github.com/JakeWharton/timber) for logging
 * [MockK](https://github.com/mockk/mockk) for mocking inside the Unit Test
 
 ## Screens
